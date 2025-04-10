@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import GameCard from '../components/GameCard';
-import { Gamepad, CheckSquare, Brain, BrainCircuit } from 'lucide-react';
+import { Gamepad, CheckSquare, Brain, BrainCircuit, Grid3X3 } from 'lucide-react';
 
 const Index = () => {
   return (
@@ -39,11 +39,18 @@ const Index = () => {
               color="hover:bg-calm-blue/20"
             />
             <GameCard 
+              title="Tetris Effect" 
+              description="A beautiful, immersive version of the classic game with calming visuals." 
+              icon={<Grid3X3 size={32} />} 
+              path="/games/tetris-effect"
+              color="hover:bg-calm-green/20"
+            />
+            <GameCard 
               title="Stress Check" 
               description="Measure your current stress levels with our quick assessment." 
               icon={<BrainCircuit size={32} />} 
               path="/stress-check"
-              color="hover:bg-calm-green/20"
+              color="hover:bg-calm-yellow/20"
             />
           </div>
         </div>

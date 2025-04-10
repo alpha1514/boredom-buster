@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import GamesPage from "./pages/GamesPage";
 import TicTacToe from "./games/TicTacToe";
 import Sudoku from "./games/Sudoku";
+import TetrisEffect from "./games/TetrisEffect";
 import StressCheck from "./pages/StressCheck";
 import NotFound from "./pages/NotFound";
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/games" element={<GamesPage />} />
           <Route path="/games/tic-tac-toe" element={<TicTacToe />} />
           <Route path="/games/sudoku" element={<Sudoku />} />
+          <Route path="/games/tetris-effect" element={<TetrisEffect />} />
           <Route path="/stress-check" element={<StressCheck />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -2,7 +2,7 @@
 import React from 'react';
 import Layout from '../components/Layout';
 import GameCard from '../components/GameCard';
-import { CheckSquare, Brain } from 'lucide-react';
+import { CheckSquare, Brain, Puzzle, Grid3X3 } from 'lucide-react';
 
 const GamesPage = () => {
   return (
@@ -28,6 +28,13 @@ const GamesPage = () => {
             icon={<Brain size={32} />} 
             path="/games/sudoku"
             color="hover:bg-calm-blue/20"
+          />
+          <GameCard 
+            title="Tetris Effect" 
+            description="A beautiful, immersive version of the classic game with calming visuals." 
+            icon={<Grid3X3 size={32} />} 
+            path="/games/tetris-effect"
+            color="hover:bg-calm-green/20"
           />
         </div>
       </div>
