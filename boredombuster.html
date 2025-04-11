@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boredom Buster</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background: #0f0c29;
+            background: linear-gradient(135deg, #24243e, #302b63, #0f0c29);
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        .container {
+            position: relative;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        .parallax-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        .parallax-bg div {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+            transform: translateZ(0);
+            transition: transform 0.5s ease-out;
+        }
+
+        #intro-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+            transform-style: preserve-3d;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .content-box {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            transform-style: preserve-3d;
+            transform: translateZ(50px);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: glow 2s ease-in-out infinite alternate;
+            transform: translateZ(75px);
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+            transform: translateZ(60px);
+        }
+
+        p {
+            font-size: 0.9rem;
+            max-width: 600px;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            transform: translateZ(50px);
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: translateZ(80px);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 1px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            opacity: 0.2;
+            transform: translateX(-100%) rotate(45deg);
+            transition: transform 0.5s;
+        }
+
+        .btn:hover::before {
+            transform: translateX(100%) rotate(45deg);
+        }
+
+        .btn:hover {
+            background: white;
+            color: #302b63;
+            box-shadow: 0 7px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px rgba(255, 255, 255, 0.5),
+                             0 0 10px rgba(255, 255, 255, 0.5),
+                             0 0 15px rgba(255, 255, 255, 0.5);
+            }
+            to {
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.8),
+                             0 0 20px rgba(255, 255, 255, 0.8),
+                             0 0 30px rgba(255, 255, 255, 0.8);
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .highlight {
+            color: #a8edea;
+            font-weight: bold;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="parallax-bg">
+            <div id="bg1" style="background-image: url('/api/placeholder/800/600');"></div>
+            <div id="bg2" style="background-image: url('/api/placeholder/800/600'); opacity: 0;"></div>
+            <div id="bg3" style="background-image: url('/api/placeholder/800/600'); opacity: 0;"></div>
+        </div>
+
+        <div id="intro-page">
+            <div class="content-box">
+                <h1>Boredom Buster</h1>
+                <div class="subtitle">Your escape from the everyday hustle</div>
+                <p>Welcome to <span class="highlight">Boredom Buster</span> – your ultimate escape from the everyday hustle! We know how draining work and daily responsibilities can be, and that's exactly why we created this space. Boredom Buster is packed with a variety of simple, fun, and relaxing games designed to help you de-stress, recharge, and bring a little spark of joy into your day. Whether you're on a short break, winding down after a long day, or just looking for a quick pick-me-up, our games offer a perfect way to refresh your mind and lift your mood. No pressure, no complicated rules – just pure, effortless fun at your fingertips. So go ahead, explore, play, and let Boredom Buster turn your free moments into happy ones!</p>
+                <button class="btn" id="start-button">Start Playing</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create 3D effect with mouse movement
+            const container = document.querySelector('.container');
+            const contentBox = document.querySelector('.content-box');
+            const title = document.querySelector('h1');
+            const subtitle = document.querySelector('.subtitle');
+            const paragraph = document.querySelector('p');
+            const button = document.querySelector('.btn');
+            const backgrounds = [
+                document.getElementById('bg1'),
+                document.getElementById('bg2'),
+                document.getElementById('bg3')
+            ];
+            
+            // Handle 3D effect with mouse movement
+            document.addEventListener('mousemove', e => {
+                const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+                const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+                
+                contentBox.style.transform = `translateZ(50px) rotateY(${xAxis}deg) rotateX(${-yAxis}deg)`;
+                title.style.transform = `translateZ(75px) rotateY(${xAxis/2}deg)`;
+                subtitle.style.transform = `translateZ(60px)`;
+                paragraph.style.transform = `translateZ(50px)`;
+                button.style.transform = `translateZ(80px)`;
+                
+                // Parallax effect for background images
+                backgrounds.forEach((bg, index) => {
+                    const depth = (index + 1) * 5;
+                    bg.style.transform = `translateX(${xAxis * depth}px) translateY(${yAxis * depth}px)`;
+                });
+            });
+            
+            // Animate content on load
+            setTimeout(() => {
+                contentBox.style.opacity = '1';
+                title.style.opacity = '1';
+                subtitle.style.opacity = '1';
+                paragraph.style.opacity = '1';
+                button.style.opacity = '1';
+            }, 500);
+            
+            // Create floating particles
+            createParticles();
+            
+            // Cycle through background images
+            cycleBackgrounds();
+            
+            // Handle button click to proceed to games
+            document.getElementById('start-button').addEventListener('click', () => {
+                window.location.href = 'games.html'; // Redirect to your games page
+            });
+        });
+        
+        function createParticles() {
+            const particleCount = 50;
+            const container = document.querySelector('.container');
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random size between 2px and 6px
+                const size = Math.random() * 4 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Random position
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Random opacity
+                particle.style.opacity = Math.random() * 0.5 + 0.1;
+                
+                // Random animation
+                const duration = Math.random() * 60 + 30;
+                particle.style.animation = `float ${duration}s infinite`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                
+                container.appendChild(particle);
+            }
+        }
+        
+        function cycleBackgrounds() {
+            const backgrounds = [
+                document.getElementById('bg1'),
+                document.getElementById('bg2'),
+                document.getElementById('bg3')
+            ];
+            
+            let currentBg = 0;
+            
+            setInterval(() => {
+                backgrounds[currentBg].style.opacity = '0';
+                currentBg = (currentBg + 1) % backgrounds.length;
+                backgrounds[currentBg].style.opacity = '1';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
