@@ -1,15 +1,22 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import GameCard from '../components/GameCard';
 import { Gamepad, CheckSquare, Brain, BrainCircuit, Grid3X3, Mountain, Box } from 'lucide-react';
 
 const Index = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Trigger animation after component mounts
+    setIsLoaded(true);
+  }, []);
+
   return (
     <Layout>
       <section className="py-12">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-1000 ease-in-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">
             Welcome to <span className="text-calm-purple">Boredom Buster</span>
           </h1>
@@ -21,7 +28,7 @@ const Index = () => {
           </Link>
         </div>
 
-        <div className="mt-12">
+        <div className={`mt-12 transition-all duration-1000 delay-300 ease-in-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <h2 className="text-2xl font-bold mb-8 text-center">Featured Activities</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <GameCard 
@@ -30,6 +37,7 @@ const Index = () => {
               icon={<CheckSquare size={32} />} 
               path="/games/tic-tac-toe"
               color="hover:bg-calm-lavender/20"
+              imageSrc="https://images.unsplash.com/photo-1516110833967-0b5716ca1387?auto=format&fit=crop&q=80&w=1974"
             />
             <GameCard 
               title="Sudoku" 
@@ -37,6 +45,7 @@ const Index = () => {
               icon={<Brain size={32} />} 
               path="/games/sudoku"
               color="hover:bg-calm-blue/20"
+              imageSrc="https://images.unsplash.com/photo-1471107340929-a87cd0f5b5f3?auto=format&fit=crop&q=80&w=1973"
             />
             <GameCard 
               title="Monument Valley" 
@@ -44,6 +53,7 @@ const Index = () => {
               icon={<Mountain size={32} />} 
               path="/games/monument-valley"
               color="hover:bg-calm-purple/20"
+              imageSrc="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2070"
             />
             <GameCard 
               title="Unpacking" 
@@ -51,6 +61,7 @@ const Index = () => {
               icon={<Box size={32} />} 
               path="/games/unpacking"
               color="hover:bg-calm-yellow/20"
+              imageSrc="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=2070"
             />
             <GameCard 
               title="Tetris Effect" 
@@ -58,6 +69,7 @@ const Index = () => {
               icon={<Grid3X3 size={32} />} 
               path="/games/tetris-effect"
               color="hover:bg-calm-green/20"
+              imageSrc="https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&q=80&w=2070"
             />
             <GameCard 
               title="Stress Check" 
@@ -65,11 +77,12 @@ const Index = () => {
               icon={<BrainCircuit size={32} />} 
               path="/stress-check"
               color="hover:bg-calm-yellow/20"
+              imageSrc="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=2032"
             />
           </div>
         </div>
 
-        <div className="mt-24 text-center bg-white/70 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-calm-lavender/50">
+        <div className={`mt-24 text-center bg-white/70 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-calm-lavender/50 transition-all duration-1000 delay-600 ease-in-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <h2 className="text-2xl font-bold mb-4">Why Play Games?</h2>
           <p className="text-lg text-gray-600 mb-6">
             Simple games can help reduce stress by:

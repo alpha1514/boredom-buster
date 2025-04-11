@@ -2,7 +2,7 @@
 import React from 'react';
 import Layout from '../components/Layout';
 import GameCard from '../components/GameCard';
-import { CheckSquare, Brain, Puzzle, Grid3X3, Box, Mountain } from 'lucide-react';
+import { CheckSquare, Brain, Grid3X3, Box, Mountain } from 'lucide-react';
 
 const GamesPage = () => {
   return (
@@ -21,6 +21,7 @@ const GamesPage = () => {
             icon={<CheckSquare size={32} />} 
             path="/games/tic-tac-toe"
             color="hover:bg-calm-lavender/20"
+            imageSrc="https://images.unsplash.com/photo-1516110833967-0b5716ca1387?auto=format&fit=crop&q=80&w=1974"
           />
           <GameCard 
             title="Sudoku" 
@@ -28,6 +29,7 @@ const GamesPage = () => {
             icon={<Brain size={32} />} 
             path="/games/sudoku"
             color="hover:bg-calm-blue/20"
+            imageSrc="https://images.unsplash.com/photo-1471107340929-a87cd0f5b5f3?auto=format&fit=crop&q=80&w=1973"
           />
           <GameCard 
             title="Tetris Effect" 
@@ -35,6 +37,7 @@ const GamesPage = () => {
             icon={<Grid3X3 size={32} />} 
             path="/games/tetris-effect"
             color="hover:bg-calm-green/20"
+            imageSrc="https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&q=80&w=2070"
           />
           <GameCard 
             title="Monument Valley" 
@@ -42,6 +45,7 @@ const GamesPage = () => {
             icon={<Mountain size={32} />} 
             path="/games/monument-valley"
             color="hover:bg-calm-purple/20"
+            imageSrc="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2070"
           />
           <GameCard 
             title="Unpacking" 
@@ -49,6 +53,7 @@ const GamesPage = () => {
             icon={<Box size={32} />} 
             path="/games/unpacking"
             color="hover:bg-calm-yellow/20"
+            imageSrc="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=2070"
           />
         </div>
       </div>
