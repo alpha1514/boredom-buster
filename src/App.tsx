@@ -9,6 +9,8 @@ import GamesPage from "./pages/GamesPage";
 import TicTacToe from "./games/TicTacToe";
 import Sudoku from "./games/Sudoku";
 import TetrisEffect from "./games/TetrisEffect";
+import MonumentValley from "./games/MonumentValley";
+import Unpacking from "./games/Unpacking";
 import StressCheck from "./pages/StressCheck";
 import NotFound from "./pages/NotFound";
 
@@ -26,6 +28,8 @@ const App = () => (
           <Route path="/games/tic-tac-toe" element={<TicTacToe />} />
           <Route path="/games/sudoku" element={<Sudoku />} />
           <Route path="/games/tetris-effect" element={<TetrisEffect />} />
+          <Route path="/games/monument-valley" element={<MonumentValley />} />
+          <Route path="/games/unpacking" element={<Unpacking />} />
           <Route path="/stress-check" element={<StressCheck />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

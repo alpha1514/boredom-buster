@@ -2,7 +2,7 @@
 import React from 'react';
 import Layout from '../components/Layout';
 import GameCard from '../components/GameCard';
-import { CheckSquare, Brain, Puzzle, Grid3X3 } from 'lucide-react';
+import { CheckSquare, Brain, Puzzle, Grid3X3, Box, Mountain } from 'lucide-react';
 
 const GamesPage = () => {
   return (
@@ -35,6 +35,20 @@ const GamesPage = () => {
             icon={<Grid3X3 size={32} />} 
             path="/games/tetris-effect"
             color="hover:bg-calm-green/20"
+          />
+          <GameCard 
+            title="Monument Valley" 
+            description="A peaceful puzzle game with gorgeous design and simple mechanics." 
+            icon={<Mountain size={32} />} 
+            path="/games/monument-valley"
+            color="hover:bg-calm-purple/20"
+          />
+          <GameCard 
+            title="Unpacking" 
+            description="A meditative game where you unpack boxes and place objects in a new home." 
+            icon={<Box size={32} />} 
+            path="/games/unpacking"
+            color="hover:bg-calm-yellow/20"
           />
         </div>
       </div>
