@@ -2,6 +2,7 @@
 import React from 'react';
 import NavBar from './NavBar';
 import Footer from './Footer';
+import AIAssistant from './AIAssistant';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ const Layout = ({ children }: LayoutProps) => {
       <main className="flex-grow pt-24 pb-16 container mx-auto px-4">
         {children}
       </main>
+      <AIAssistant />
       <Footer />
     </div>
   );

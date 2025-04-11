@@ -14,8 +14,8 @@ interface GameCardProps {
 
 const GameCard = ({ title, description, icon, path, color, imageSrc }: GameCardProps) => {
   return (
-    <Link to={path} className="block">
-      <div className={`card-game group overflow-hidden relative ${color}`}>
+    <Link to={path} className="block transition-transform duration-300 hover:scale-105">
+      <div className={`card-game group overflow-hidden relative ${color} h-full`}>
         <div className="absolute -right-6 -top-6 opacity-10 group-hover:opacity-20 transition-opacity">
           <div className="text-calm-purple/80" style={{ transform: 'scale(4)' }}>
             {icon}
