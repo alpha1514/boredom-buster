@@ -10,7 +10,7 @@ const NavBar = () => {
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
             <Gamepad size={28} className="text-calm-purple" />
-            <span className="text-xl font-bold text-calm-purple">CalmPlayZone</span>
+            <span className="text-xl font-bold text-calm-purple">Boredom Buster</span>
           </Link>
           
           <div className="flex items-center space-x-6">

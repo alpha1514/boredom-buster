@@ -11,7 +11,7 @@ const Index = () => {
       <section className="py-12">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">
-            Welcome to <span className="text-calm-purple">CalmPlayZone</span>
+            Welcome to <span className="text-calm-purple">Boredom Buster</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             Take a moment to relax with our simple games and activities designed to reduce stress and bring calm to your day.

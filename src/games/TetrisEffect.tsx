@@ -1,9 +1,11 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Layout from '../components/Layout';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from "@/components/ui/button";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, RotateCcw } from 'lucide-react';
 
-// Define tetromino shapes
+// Define tetromino shapes and colors
 const TETROMINOES = {
   I: { shape: [[1, 1, 1, 1]], color: 'bg-cyan-500' },
   J: { shape: [[1, 0, 0], [1, 1, 1]], color: 'bg-blue-500' },
@@ -17,20 +19,32 @@ const TETROMINOES = {
 // Game constants
 const BOARD_WIDTH = 10;
 const BOARD_HEIGHT = 20;
-const EMPTY_CELL = 0;
+const EMPTY_CELL = null;
+const INITIAL_SPEED = 1000; // ms
 
 const TetrisEffect = () => {
   const { toast } = useToast();
-  
-  // Game state
-  const [board, setBoard] = useState(createEmptyBoard());
-  const [currentPiece, setCurrentPiece] = useState(null);
+  const [board, setBoard] = useState<(string | null)[][]>(createEmptyBoard());
+  const [currentPiece, setCurrentPiece] = useState<{
+    shape: number[][];
+    color: string;
+    key: string;
+  } | null>(null);
+  const [nextPiece, setNextPiece] = useState<{
+    shape: number[][];
+    color: string;
+    key: string;
+  } | null>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [score, setScore] = useState(0);
+  const [level, setLevel] = useState(1);
   const [gameOver, setGameOver] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [level, setLevel] = useState(1);
-  const [nextPiece, setNextPiece] = useState(null);
+  const [speed, setSpeed] = useState(INITIAL_SPEED);
+  
+  const requestRef = useRef<number>();
+  const lastTimeRef = useRef<number>(0);
+  const dropCounterRef = useRef<number>(0);
   
   // Create an empty game board
   function createEmptyBoard() {
@@ -44,11 +58,204 @@ const TetrisEffect = () => {
     const keys = Object.keys(TETROMINOES);
     const tetroKey = keys[Math.floor(Math.random() * keys.length)];
     return {
-      shape: TETROMINOES[tetroKey].shape,
+      shape: [...TETROMINOES[tetroKey].shape], // Create a deep copy
       color: TETROMINOES[tetroKey].color,
       key: tetroKey
     };
   }, []);
+  
+  // Check for collision
+  const checkCollision = useCallback((piece, posX, posY) => {
+    if (!piece) return true;
+    
+    for (let y = 0; y < piece.shape.length; y++) {
+      for (let x = 0; x < piece.shape[y].length; x++) {
+        // Skip empty cells in the tetromino
+        if (piece.shape[y][x] === 0) continue;
+        
+        const boardX = posX + x;
+        const boardY = posY + y;
+        
+        // Check boundaries
+        if (
+          boardX < 0 || 
+          boardX >= BOARD_WIDTH || 
+          boardY >= BOARD_HEIGHT
+        ) {
+          return true;
+        }
+        
+        // Check if we're above the top boundary (valid for placement)
+        if (boardY < 0) continue;
+        
+        // Check collision with placed pieces
+        if (board[boardY][boardX] !== EMPTY_CELL) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  }, [board]);
+  
+  // Rotate tetromino
+  const rotatePiece = useCallback(() => {
+    if (!currentPiece) return;
+    
+    // Create a rotated version of the current piece
+    const rotated = {
+      ...currentPiece,
+      shape: currentPiece.shape[0].map((_, index) =>
+        currentPiece.shape.map(row => row[index]).reverse()
+      )
+    };
+    
+    // Only set if there's no collision
+    if (!checkCollision(rotated, position.x, position.y)) {
+      setCurrentPiece(rotated);
+    }
+  }, [currentPiece, position, checkCollision]);
+  
+  // Move tetromino
+  const movePiece = useCallback((direction) => {
+    if (!currentPiece || gameOver || isPaused) return;
+    
+    let newX = position.x;
+    let newY = position.y;
+    
+    switch (direction) {
+      case 'left':
+        newX -= 1;
+        break;
+      case 'right':
+        newX += 1;
+        break;
+      case 'down':
+        newY += 1;
+        break;
+      default:
+        break;
+    }
+    
+    // Check if move is valid
+    if (!checkCollision(currentPiece, newX, newY)) {
+      setPosition({ x: newX, y: newY });
+      return true;
+    }
+    
+    // If moving down causes collision, place the piece
+    if (direction === 'down') {
+      placePiece();
+      return false;
+    }
+    
+    return false;
+  }, [currentPiece, position, gameOver, isPaused, checkCollision]);
+  
+  // Place piece on the board
+  const placePiece = useCallback(() => {
+    if (!currentPiece) return;
+    
+    // Create a new board with the current piece placed
+    const newBoard = [...board.map(row => [...row])];
+    
+    currentPiece.shape.forEach((row, y) => {
+      row.forEach((cell, x) => {
+        if (cell !== 0) {
+          const boardY = position.y + y;
+          if (boardY >= 0) { // Only place if it's on the board
+            const boardX = position.x + x;
+            newBoard[boardY][boardX] = currentPiece.key;
+          }
+        }
+      });
+    });
+    
+    // Check if game over (piece placed above the visible area)
+    if (position.y < 0) {
+      setGameOver(true);
+      toast({
+        title: "Game Over",
+        description: `Your score: ${score}. Try again!`,
+      });
+      return;
+    }
+    
+    // Add to score and clear lines
+    const { clearedBoard, linesCleared } = clearLines(newBoard);
+    setBoard(clearedBoard);
+    
+    // Update score based on lines cleared
+    if (linesCleared > 0) {
+      const points = [0, 100, 300, 500, 800][linesCleared] * level;
+      setScore(prevScore => prevScore + points);
+      
+      // Update level every 10 lines
+      const newLinesTotal = linesCleared;
+      if (newLinesTotal >= 10) {
+        const newLevel = level + 1;
+        setLevel(newLevel);
+        setSpeed(INITIAL_SPEED - (newLevel - 1) * 100);
+        toast({
+          title: `Level ${newLevel}!`,
+          description: "Speed increased!",
+        });
+      }
+    }
+    
+    // Generate the next piece
+    generateNewPiece();
+  }, [board, currentPiece, position, score, level, toast]);
+  
+  // Clear completed lines
+  const clearLines = useCallback((board) => {
+    let linesCleared = 0;
+    const newBoard = board.filter((row) => {
+      const isLineFull = row.every(cell => cell !== EMPTY_CELL);
+      if (isLineFull) {
+        linesCleared++;
+        return false;
+      }
+      return true;
+    });
+    
+    // Add new empty lines at the top
+    while (newBoard.length < BOARD_HEIGHT) {
+      newBoard.unshift(Array(BOARD_WIDTH).fill(EMPTY_CELL));
+    }
+    
+    return { clearedBoard: newBoard, linesCleared };
+  }, []);
+  
+  // Generate a new piece
+  const generateNewPiece = useCallback(() => {
+    if (nextPiece) {
+      setCurrentPiece(nextPiece);
+    } else {
+      setCurrentPiece(randomTetromino());
+    }
+    
+    setNextPiece(randomTetromino());
+    
+    // Reset position to top center
+    setPosition({
+      x: Math.floor(BOARD_WIDTH / 2) - 1, 
+      y: -2 // Start above the board so it appears gradually
+    });
+  }, [nextPiece, randomTetromino]);
+  
+  // Hard drop the current piece
+  const hardDrop = useCallback(() => {
+    if (!currentPiece || gameOver || isPaused) return;
+    
+    let newY = position.y;
+    while (!checkCollision(currentPiece, position.x, newY + 1)) {
+      newY++;
+    }
+    
+    setPosition({ ...position, y: newY });
+    placePiece();
+  }, [currentPiece, position, gameOver, isPaused, checkCollision, placePiece]);
   
   // Start new game
   const startGame = useCallback(() => {
@@ -56,79 +263,90 @@ const TetrisEffect = () => {
     setBoard(createEmptyBoard());
     setScore(0);
     setLevel(1);
+    setSpeed(INITIAL_SPEED);
     setGameOver(false);
     setIsPaused(false);
     
-    // Create the initial tetromino
-    const initialPiece = randomTetromino();
-    const nextPiece = randomTetromino();
+    // Generate initial pieces
+    const initial = randomTetromino();
+    const next = randomTetromino();
+    
+    setCurrentPiece(initial);
+    setNextPiece(next);
     
     // Place the tetromino at the top center of the board
-    setCurrentPiece(initialPiece);
-    setNextPiece(nextPiece);
-    setPosition({ 
-      x: Math.floor(BOARD_WIDTH / 2) - Math.floor(initialPiece.shape[0].length / 2), 
-      y: 0 
+    setPosition({
+      x: Math.floor(BOARD_WIDTH / 2) - 1,
+      y: -2
     });
     
     toast({
       title: "Game Started",
-      description: "Use arrow keys to move blocks. Space to drop.",
+      description: "Use arrow keys to move, Space to drop.",
     });
   }, [randomTetromino, toast]);
   
-  // Display the game board with current piece
-  const renderBoard = () => {
-    // Create a copy of the current board
-    const displayBoard = board.map(row => [...row]);
-    
-    // Render the current piece on the display board
-    if (currentPiece) {
-      currentPiece.shape.forEach((row, y) => {
-        row.forEach((cell, x) => {
-          if (cell !== EMPTY_CELL) {
-            const boardY = position.y + y;
-            const boardX = position.x + x;
-            
-            // Only render if within bounds
-            if (boardY >= 0 && boardY < BOARD_HEIGHT && 
-                boardX >= 0 && boardX < BOARD_WIDTH) {
-              displayBoard[boardY][boardX] = currentPiece.key;
-            }
-          }
-        });
-      });
+  // Game loop
+  const gameLoop = useCallback((time) => {
+    if (gameOver || isPaused) {
+      lastTimeRef.current = 0;
+      dropCounterRef.current = 0;
+      return;
     }
     
-    return displayBoard;
-  };
-  
-  // Initialize game
-  useEffect(() => {
-    startGame();
+    const deltaTime = time - (lastTimeRef.current || time);
+    lastTimeRef.current = time;
     
+    dropCounterRef.current += deltaTime;
+    
+    if (dropCounterRef.current > speed) {
+      movePiece('down');
+      dropCounterRef.current = 0;
+    }
+    
+    requestRef.current = requestAnimationFrame(gameLoop);
+  }, [gameOver, isPaused, speed, movePiece]);
+  
+  // Start and stop game loop
+  useEffect(() => {
+    if (!gameOver && !isPaused) {
+      requestRef.current = requestAnimationFrame(gameLoop);
+    }
+    
+    return () => {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+    };
+  }, [gameOver, isPaused, gameLoop]);
+  
+  // Handle keyboard input
+  useEffect(() => {
     const handleKeyDown = (e) => {
-      if (gameOver || isPaused) return;
+      if (gameOver) return;
       
-      // Basic controls (simplified for demo)
+      if (e.key === 'p') {
+        setIsPaused(prev => !prev);
+        return;
+      }
+      
+      if (isPaused) return;
+      
       switch (e.key) {
         case 'ArrowLeft':
-          // Move left logic would go here
+          movePiece('left');
           break;
         case 'ArrowRight':
-          // Move right logic would go here
+          movePiece('right');
           break;
         case 'ArrowDown':
-          // Move down logic would go here
+          movePiece('down');
           break;
         case 'ArrowUp':
-          // Rotate logic would go here
+          rotatePiece();
           break;
         case ' ':
-          // Hard drop logic would go here
-          break;
-        case 'p':
-          setIsPaused(!isPaused);
+          hardDrop();
           break;
         default:
           break;
@@ -139,10 +357,79 @@ const TetrisEffect = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [gameOver, isPaused, startGame]);
+  }, [gameOver, isPaused, movePiece, rotatePiece, hardDrop]);
   
-  // Render the display board
+  // Initialize game
+  useEffect(() => {
+    startGame();
+    return () => {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+    };
+  }, [startGame]);
+  
+  // Render next piece preview
+  const renderNextPiece = () => {
+    if (!nextPiece) return null;
+    
+    return (
+      <div className="grid gap-px" style={{ 
+        gridTemplateColumns: `repeat(${nextPiece.shape[0].length}, 1fr)`,
+      }}>
+        {nextPiece.shape.map((row, y) => 
+          row.map((cell, x) => (
+            <div 
+              key={`next-${y}-${x}`} 
+              className={`${cell !== 0 ? nextPiece.color : 'bg-transparent'} 
+                         w-5 h-5 rounded-sm`}
+            />
+          ))
+        )}
+      </div>
+    );
+  };
+  
+  // Render the game board
+  const renderBoard = () => {
+    // Create a copy of the current board
+    const displayBoard = board.map(row => [...row]);
+    
+    // Add the current piece to the display board
+    if (currentPiece) {
+      currentPiece.shape.forEach((row, y) => {
+        row.forEach((cell, x) => {
+          if (cell !== 0) {
+            const boardY = position.y + y;
+            const boardX = position.x + x;
+            
+            // Only render if within bounds
+            if (
+              boardY >= 0 && boardY < BOARD_HEIGHT && 
+              boardX >= 0 && boardX < BOARD_WIDTH
+            ) {
+              displayBoard[boardY][boardX] = currentPiece.key;
+            }
+          }
+        });
+      });
+    }
+    
+    return displayBoard;
+  };
+  
   const boardDisplay = renderBoard();
+  
+  // Handle touch controls
+  const handleTouchControl = (direction) => {
+    if (direction === 'rotate') {
+      rotatePiece();
+    } else if (direction === 'drop') {
+      hardDrop();
+    } else {
+      movePiece(direction);
+    }
+  };
   
   return (
     <Layout>
@@ -168,25 +455,25 @@ const TetrisEffect = () => {
             
             <div className="mb-6">
               <h2 className="text-xl font-bold mb-3">Next Piece</h2>
-              <div className="w-20 h-20 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                {/* Next piece preview would go here */}
-                <div className="text-gray-400">Preview</div>
+              <div className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4">
+                {nextPiece ? renderNextPiece() : <div className="text-gray-400">Preview</div>}
               </div>
             </div>
             
             <div className="space-y-2">
-              <button 
+              <Button 
                 onClick={startGame}
-                className="w-full bg-calm-purple text-white px-4 py-2 rounded-lg hover:bg-calm-purple/90 transition-colors"
+                className="w-full bg-calm-purple text-white"
               >
                 New Game
-              </button>
-              <button 
+              </Button>
+              <Button 
                 onClick={() => setIsPaused(!isPaused)}
-                className="w-full border border-calm-purple text-calm-purple px-4 py-2 rounded-lg hover:bg-calm-purple/10 transition-colors"
+                variant="outline"
+                className="w-full border border-calm-purple text-calm-purple"
               >
                 {isPaused ? 'Resume' : 'Pause'}
-              </button>
+              </Button>
             </div>
           </div>
           
@@ -198,12 +485,12 @@ const TetrisEffect = () => {
                 <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-10">
                   <h2 className="text-white text-2xl font-bold mb-4">Game Over</h2>
                   <p className="text-white mb-4">Your score: {score}</p>
-                  <button 
+                  <Button 
                     onClick={startGame}
-                    className="bg-calm-purple text-white px-6 py-2 rounded-lg hover:bg-calm-purple/90 transition-colors"
+                    className="bg-calm-purple text-white"
                   >
                     Play Again
-                  </button>
+                  </Button>
                 </div>
               )}
               
@@ -228,6 +515,38 @@ const TetrisEffect = () => {
                                aspect-square rounded-sm shadow-inner`}
                   />
                 ))}
+              </div>
+            </div>
+            
+            {/* Touch controls for mobile */}
+            <div className="mt-6 grid grid-cols-3 gap-2 md:hidden">
+              <div className="flex justify-center">
+                <Button onClick={() => handleTouchControl('left')} variant="outline">
+                  <ArrowLeft />
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 gap-2">
+                <div className="flex justify-center">
+                  <Button onClick={() => handleTouchControl('rotate')} variant="outline">
+                    <RotateCcw />
+                  </Button>
+                </div>
+                <div className="flex justify-center">
+                  <Button onClick={() => handleTouchControl('down')} variant="outline">
+                    <ArrowDown />
+                  </Button>
+                </div>
+              </div>
+              <div className="flex justify-center">
+                <Button onClick={() => handleTouchControl('right')} variant="outline">
+                  <ArrowRight />
+                </Button>
+              </div>
+              
+              <div className="col-span-3 mt-2 flex justify-center">
+                <Button onClick={() => handleTouchControl('drop')} className="w-full bg-calm-purple">
+                  Drop
+                </Button>
               </div>
             </div>
             
