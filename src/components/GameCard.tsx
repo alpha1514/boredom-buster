@@ -9,9 +9,10 @@ interface GameCardProps {
   icon: React.ReactNode;
   path: string;
   color: string;
+  imageSrc: string;
 }
 
-const GameCard = ({ title, description, icon, path, color }: GameCardProps) => {
+const GameCard = ({ title, description, icon, path, color, imageSrc }: GameCardProps) => {
   return (
     <Link to={path} className="block">
       <div className={`card-game group overflow-hidden relative ${color}`}>
@@ -27,6 +28,11 @@ const GameCard = ({ title, description, icon, path, color }: GameCardProps) => {
           <h3 className="text-xl font-bold mb-2">{title}</h3>
           <p className="text-gray-600">{description}</p>
         </div>
+        {imageSrc && (
+          <div className="absolute inset-0 -z-10 opacity-10 group-hover:opacity-20 transition-all duration-300">
+            <img src={imageSrc} alt={title} className="w-full h-full object-cover" />
+          </div>
+        )}
       </div>
     </Link>
   );
